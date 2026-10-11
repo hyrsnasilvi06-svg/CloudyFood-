@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Bebu Dashboard - Hay Day Inventory</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen pb-12">
+
+    <div class="max-w-3xl mx-auto px-4 py-6">
+        
+        <!-- Dashboard Header Card -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-pink-600 mb-1">Admin Bebu Dashboard</h1>
+            <p class="text-gray-500 text-sm md:text-base mb-5">Pusat kendali inventory makanan Hay Day</p>
+            
+            <div class="flex flex-wrap gap-3">
+                <button onclick="alert('Fitur Tambah Food')" class="bg-slate-700 hover:bg-slate-800 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 text-sm">
+                    ➕ Tambah Food
+                </button>
+                <button onclick="alert('Fitur Rewrite ke GitHub')" class="bg-slate-900 hover:bg-black text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 text-sm">
+                    🚀 Rewrite ke GitHub
+                </button>
+                <button onclick="downloadJSON()" class="bg-pink-600 hover:bg-pink-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 text-sm">
+                    💾 Download JSON
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative mb-4">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
+                🔍
+            </span>
+            <input type="text" id="searchInput" oninput="filterData()" placeholder="Cari nama food atau mesin..." 
+                class="w-full pl-11 pr-4 py-3.5 bg-white rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm shadow-sm">
+        </div>
+
+        <!-- Filter Mesin -->
+        <div class="mb-4">
+            <select id="machineFilter" onchange="filterData()" class="w-full px-4 py-3.5 bg-white rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm shadow-sm text-gray-700">
+                <option value="">Semua Mesin</option>
+                <option value="Grill">Grill</option>
+                <option value="Dairy">Dairy</option>
+                <option value="Bakery">Bakery</option>
+            </select>
+        </div>
+
+        <!-- Filter Status Stok -->
+        <div class="mb-6">
+            <select id="statusFilter" onchange="filterData()" class="w-full px-4 py-3.5 bg-white rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-500 text-sm shadow-sm text-gray-700">
+                <option value="">Semua Status Stok</option>
+                <option value="tersedia">Tersedia</option>
+                <option value="habis">Habis</option>
+            </select>
+        </div>
+
+        <!-- Data List Card -->
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <div id="itemCountHeader" class="px-6 py-4 bg-gray-50/70 border-b border-gray-100 text-sm font-medium text-gray-500">
+                Menampilkan item food
+            </div>
+
+            <!-- Table Header for Desktop / List for Mobile -->
+            <div class="divide-y divide-gray-100" id="foodListContainer">
+                <!-- Item will be injected by JavaScript -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Contoh Data Dummy (Sesuai dengan screenshot Anda)
+        const foodData = [
+            { id: 1, name: "Doner Domba Muda Gulung", eng: "Lamb Doner Wrap", img: "https://via.placeholder.com/60", machine: "Grill" },
+            { id: 2, name: "Doner Kacang Pedas", eng: "Spicy Bean Doner", img: "https://via.placeholder.com/60", machine: "Grill" },
+            { id: 3, name: "Menara Doner Super", eng: "Tower Doner Supreme", img: "https://via.placeholder.com/60", machine: "Grill" },
+            { id: 4, name: "Diffuser Wangi", eng: "Fresh Diffuser", img: "https://via.placeholder.com/60", machine: "Gift Shop" },
+            { id: 5, name: "Parfum Segar", eng: "Zesty Perfume", img: "https://via.placeholder.com/60", machine: "Gift Shop" },
+            { id: 6, name: "Susu Kocok Vanila", eng: "Vanilla Milkshake", img: "https://via.placeholder.com/60", machine: "Dairy" },
+            { id: 7, name: "Wafel Polos", eng: "Plain Waffles", img: "https://via.placeholder.com/60", machine: "Bakery" }
+        ];
+
+        function renderList(data) {
+            const container = document.getElementById('foodListContainer');
+            document.getElementById('itemCountHeader').innerText = `Menampilkan ${data.length} dari total ${foodData.length} item food`;
+            
+            if (data.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-gray-400 text-sm">Tidak ada item yang ditemukan.</div>`;
+                return;
+            }
+
+            container.innerHTML = data.map(item => `
+                <div class="flex items-center px-6 py-4 hover:bg-gray-50/50 transition">
+                    <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mr-4 shrink-0 border border-blue-100 overflow-hidden">
+                        <img src="${item.img}" alt="${item.name}" class="w-10 h-10 object-contain">
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-base">${item.name}</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">${item.eng}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterData() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const machine = document.getElementById('machineFilter').value;
+
+            const filtered = foodData.filter(item => {
+                const matchKeyword = item.name.toLowerCase().includes(keyword) || item.eng.toLowerCase().includes(keyword);
+                const matchMachine = machine === "" || item.machine === machine;
+                return matchKeyword && matchMachine;
+            });
+
+            renderList(filtered);
+        }
+
+        function downloadJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(foodData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "hayday_inventory.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // Inisialisasi awal
+        renderList(foodData);
+    </script>
+</body>
+</html>
